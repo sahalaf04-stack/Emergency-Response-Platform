@@ -1,0 +1,2224 @@
+* {
+  box-sizing: border-box;
+}
+
+
+body {
+  margin: 0;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background: #f4f6f8;
+
+  color: #222;
+}
+
+
+.app {
+  min-height: 100vh;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header {
+
+  background: #c62828;
+
+  color: white;
+
+  padding: 30px;
+
+  text-align: center;
+
+}
+
+
+.header h1 {
+
+  margin: 0;
+
+  font-size: 32px;
+
+}
+
+
+.header p {
+
+  margin-top: 8px;
+
+  opacity: 0.9;
+
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.container {
+
+  width: 92%;
+
+  max-width: 1150px;
+
+  margin: 30px auto;
+
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.card {
+
+  background: white;
+
+  padding: 28px;
+
+  margin-bottom: 25px;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 4px 15px
+    rgba(0, 0, 0, 0.08);
+
+}
+
+
+.card h2 {
+
+  margin-top: 0;
+
+}
+
+
+.section-description {
+
+  color: #666;
+
+  margin-bottom: 20px;
+
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+}
+
+
+label {
+
+  font-weight: bold;
+
+  margin-top: 5px;
+
+}
+
+
+input,
+select,
+textarea {
+
+  width: 100%;
+
+  padding: 13px;
+
+  border: 1px solid #d5d5d5;
+
+  border-radius: 8px;
+
+  font-size: 15px;
+
+  font-family: inherit;
+
+}
+
+
+textarea {
+
+  min-height: 110px;
+
+  resize: vertical;
+
+}
+
+
+input:focus,
+select:focus,
+textarea:focus {
+
+  outline: none;
+
+  border-color: #c62828;
+
+}
+
+
+/* =====================================================
+   LOCATION
+===================================================== */
+
+.location-box {
+
+  display: flex;
+
+  gap: 15px;
+
+  align-items: center;
+
+  padding: 15px;
+
+  margin-top: 10px;
+
+  background: #f5f5f5;
+
+  border-radius: 10px;
+
+}
+
+
+.location-box > span {
+
+  font-size: 28px;
+
+}
+
+
+.location-box p {
+
+  margin: 5px 0 0;
+
+  color: #666;
+
+  font-size: 14px;
+
+}
+
+
+/* =====================================================
+   REPORT BUTTON
+===================================================== */
+
+.report-button {
+
+  margin-top: 10px;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #d32f2f;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+.report-button:hover {
+
+  background: #b71c1c;
+
+}
+
+
+.report-button:disabled {
+
+  background: #999;
+
+  cursor: not-allowed;
+
+}
+
+
+/* =====================================================
+   MAP
+===================================================== */
+
+.leaflet-container {
+
+  border-radius: 12px;
+
+  z-index: 1;
+
+}
+
+
+.popup h3 {
+
+  margin-top: 0;
+
+}
+
+
+.popup p {
+
+  color: #666;
+
+}
+
+
+/* =====================================================
+   MAP MESSAGES
+===================================================== */
+
+.map-message {
+
+  padding: 12px;
+
+  margin-bottom: 10px;
+
+  background: #fff3cd;
+
+  border-radius: 8px;
+
+}
+
+
+.map-error {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 12px;
+
+  margin-bottom: 10px;
+
+  background: #f8d7da;
+
+  color: #842029;
+
+  border-radius: 8px;
+
+}
+
+
+.map-error button {
+
+  padding: 7px 12px;
+
+  background: #c62828;
+
+  color: white;
+
+  border: none;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+
+}
+
+
+/* =====================================================
+   NEARBY SERVICES
+===================================================== */
+
+.nearby-list {
+
+  margin-top: 20px;
+
+}
+
+
+.nearby-place {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 15px;
+
+  margin-bottom: 10px;
+
+  background: #f7f7f7;
+
+  border-radius: 10px;
+
+}
+
+
+.service-icon {
+
+  font-size: 30px;
+
+}
+
+
+.service-info {
+
+  flex: 1;
+
+}
+
+
+.service-info strong {
+
+  font-size: 16px;
+
+}
+
+
+.service-info p {
+
+  margin: 4px 0;
+
+  color: #666;
+
+}
+
+
+.service-info a {
+
+  color: #c62828;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-header {
+
+  margin-bottom: 20px;
+
+}
+
+
+.stats {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 15px;
+
+  margin-bottom: 30px;
+
+}
+
+
+.stat-card {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 20px;
+
+  background: #f7f7f7;
+
+  border-radius: 10px;
+
+}
+
+
+.stat-icon {
+
+  font-size: 30px;
+
+}
+
+
+.stat-card h3 {
+
+  margin: 0;
+
+  font-size: 28px;
+
+}
+
+
+.stat-card p {
+
+  margin: 5px 0 0;
+
+  color: #666;
+
+}
+
+
+/* =====================================================
+   INCIDENTS
+===================================================== */
+
+.incident-heading {
+
+  margin-top: 10px;
+
+}
+
+
+.incident {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  margin-bottom: 12px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 10px;
+
+}
+
+
+.incident-info {
+
+  flex: 1;
+
+}
+
+
+.incident-title {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+}
+
+
+.incident-title h3 {
+
+  margin: 0;
+
+}
+
+
+.incident-info p {
+
+  color: #555;
+
+}
+
+
+.incident-info small {
+
+  color: #666;
+
+  line-height: 1.8;
+
+}
+
+
+/* =====================================================
+   PRIORITY
+===================================================== */
+
+.priority {
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+}
+
+
+.priority.critical {
+
+  background: #ffcdd2;
+
+  color: #b71c1c;
+
+}
+
+
+.priority.high {
+
+  background: #ffe0b2;
+
+  color: #e65100;
+
+}
+
+
+.priority.medium {
+
+  background: #fff9c4;
+
+  color: #827717;
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-control {
+
+  min-width: 160px;
+
+}
+
+
+.status-control label {
+
+  display: block;
+
+  margin-bottom: 8px;
+
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty {
+
+  padding: 30px;
+
+  text-align: center;
+
+  background: #f7f7f7;
+
+  border-radius: 10px;
+
+  color: #666;
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+
+  text-align: center;
+
+  padding: 25px;
+
+  color: #777;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 800px) {
+
+  .stats {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+  }
+
+
+  .incident {
+
+    flex-direction: column;
+
+  }
+
+
+  .status-control {
+
+    width: 100%;
+
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .stats {
+
+    grid-template-columns: 1fr;
+
+  }
+
+
+  .header h1 {
+
+    font-size: 25px;
+
+  }
+
+
+  .card {
+
+    padding: 18px;
+
+  }
+
+}
+
+/* =====================================================
+   LOGIN / REGISTER
+===================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f6f8;
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.auth-logo {
+  font-size: 55px;
+  margin-bottom: 10px;
+}
+
+.auth-card h1 {
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.auth-card form {
+  text-align: left;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #d62828;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.auth-button:hover {
+  opacity: 0.9;
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  background: #ffe5e5;
+  color: #b00020;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  color: #666;
+}
+
+.auth-switch button {
+  border: none;
+  background: none;
+  color: #d62828;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+
+/* =====================================================
+   USER AREA
+===================================================== */
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  background: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.logout-button {
+  border: none;
+  background: #333;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   SOS
+===================================================== */
+
+.sos-card {
+  background: #fff0f0;
+  border: 2px solid #ffcccc;
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sos-card h2 {
+  margin-top: 0;
+  color: #c1121f;
+}
+
+.sos-card p {
+  margin-bottom: 0;
+  color: #666;
+}
+
+.sos-button {
+  width: 130px;
+  height: 100px;
+  border-radius: 50%;
+  border: 6px solid #ffcccc;
+  background: #d00000;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+
+  box-shadow:
+    0 0 0 8px rgba(208, 0, 0, 0.08);
+}
+
+.sos-button:hover {
+  transform: scale(1.05);
+}
+
+.sos-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   MAP LEGEND
+===================================================== */
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 15px;
+  margin-top: 12px;
+  background: #f7f7f7;
+  border-radius: 10px;
+}
+
+.map-legend span {
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   DISTANCE
+===================================================== */
+
+.distance {
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+
+/* =====================================================
+   DIRECTIONS BUTTON
+===================================================== */
+
+.directions-button {
+  text-decoration: none;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.directions-button:hover {
+  opacity: 0.85;
+}
+
+
+/* =====================================================
+   NEARBY SERVICES
+===================================================== */
+
+.nearby-section {
+  margin-top: 25px;
+}
+
+.nearby-section h3 {
+  margin-bottom: 15px;
+}
+
+.nearby-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nearby-place {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.service-icon {
+  font-size: 30px;
+}
+
+.service-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 3px;
+}
+
+.service-info span {
+  color: #666;
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .user-area {
+    width: 100%;
+  }
+
+  .sos-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sos-button {
+    width: 120px;
+    height: 120px;
+  }
+
+  .nearby-place {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .directions-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .auth-card {
+    padding: 25px;
+  }
+
+}
+
+/* =========================================
+   SOS CARD
+========================================= */
+
+.sos-card {
+  background: linear-gradient(
+    135deg,
+    #fff1f1,
+    #ffffff
+  );
+
+  border: 2px solid #ff4d4d;
+  border-radius: 18px;
+
+  padding: 25px;
+
+  margin-bottom: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  box-shadow:
+    0 8px 25px rgba(255, 0, 0, 0.12);
+}
+
+.sos-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sos-icon {
+  font-size: 55px;
+}
+
+.sos-content h2 {
+  margin: 0 0 6px;
+  color: #b00000;
+}
+
+.sos-content p {
+  margin: 5px 0;
+  color: #444;
+}
+
+.sos-content small {
+  color: #777;
+}
+
+.sos-button {
+  background: #d60000;
+  color: white;
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 18px 28px;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  min-width: 190px;
+
+  transition: 0.2s;
+}
+
+.sos-button:hover {
+  background: #a90000;
+  transform: scale(1.03);
+}
+
+.sos-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* =========================================
+   LOCATION CARD
+========================================= */
+
+.location-card {
+  background: white;
+
+  border-radius: 16px;
+
+  padding: 20px;
+
+  margin-bottom: 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.location-card h3 {
+  margin-top: 0;
+}
+
+.location-card p {
+  line-height: 1.7;
+}
+
+.location-btn {
+  border: none;
+
+  background: #1976d2;
+  color: white;
+
+  padding: 11px 18px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+.location-btn:hover {
+  background: #125ca1;
+}
+
+
+/* =========================================
+   MAP
+========================================= */
+
+.map-wrapper {
+  position: relative;
+}
+
+.leaflet-map {
+  height: 550px;
+  width: 100%;
+
+  border-radius: 15px;
+
+  z-index: 1;
+}
+
+.map-message {
+  min-height: 300px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  gap: 15px;
+
+  background: #f5f7fa;
+
+  border-radius: 15px;
+
+  font-size: 18px;
+}
+
+
+/* =========================================
+   MAP MARKERS
+========================================= */
+
+.custom-map-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.map-pin {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+
+  background: white;
+
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sos-pin {
+  animation: sosPulse 1.2s infinite;
+}
+
+@keyframes sosPulse {
+
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+
+/* =========================================
+   MAP LEGEND
+========================================= */
+
+.map-legend {
+  position: absolute;
+
+  bottom: 20px;
+  left: 20px;
+
+  z-index: 1000;
+
+  background: white;
+
+  padding: 15px;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.2);
+
+  font-size: 13px;
+
+  line-height: 1.8;
+}
+
+.map-legend h4 {
+  margin: 0 0 5px;
+}
+
+
+/* =========================================
+   POPUP
+========================================= */
+
+.popup-content {
+  min-width: 190px;
+}
+
+.popup-content h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.call-btn,
+.direction-btn {
+  border: none;
+
+  border-radius: 7px;
+
+  padding: 8px 12px;
+
+  margin: 4px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+.call-btn {
+  background: #2e7d32;
+  color: white;
+}
+
+.call-btn:hover {
+  background: #1b5e20;
+}
+
+.direction-btn {
+  background: #1976d2;
+  color: white;
+}
+
+.direction-btn:hover {
+  background: #125ca1;
+}
+
+
+/* =========================================
+   NEARBY SERVICES
+========================================= */
+
+.nearby-section {
+  margin-top: 25px;
+}
+
+.nearby-section h3 {
+  margin-bottom: 15px;
+}
+
+.nearby-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(280px, 1fr));
+
+  gap: 15px;
+}
+
+.nearby-card {
+  background: white;
+
+  border-radius: 12px;
+
+  padding: 16px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: space-between;
+}
+
+.nearby-info h4 {
+  margin: 0 0 6px;
+}
+
+.nearby-info span {
+  display: block;
+
+  color: #777;
+
+  font-size: 13px;
+
+  margin-bottom: 8px;
+
+  text-transform: capitalize;
+}
+
+.nearby-info strong {
+  display: block;
+
+  font-size: 14px;
+}
+
+.nearby-actions {
+  margin-top: 12px;
+
+  display: flex;
+
+  flex-wrap: wrap;
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.error-text {
+  color: #c62828;
+
+  background: #ffebee;
+
+  padding: 10px;
+
+  border-radius: 8px;
+}
+
+
+/* =========================================
+   ADMIN
+========================================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 15px;
+
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.stat-box span {
+  display: block;
+
+  font-size: 28px;
+
+  margin-bottom: 8px;
+}
+
+.stat-box strong {
+  display: block;
+
+  font-size: 28px;
+}
+
+.stat-box p {
+  margin: 5px 0 0;
+
+  color: #777;
+}
+
+
+/* =========================================
+   INCIDENT CARDS
+========================================= */
+
+.incident-card {
+  background: white;
+
+  border-radius: 12px;
+
+  padding: 18px;
+
+  margin-bottom: 15px;
+
+  border-left: 5px solid #1976d2;
+
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.critical-incident {
+  border-left-color: #d60000;
+
+  background: #fff5f5;
+}
+
+.incident-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.incident-header h3 {
+  margin: 0 0 5px;
+}
+
+.priority-badge {
+  background: #d60000;
+
+  color: white;
+
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+}
+
+.status-actions select {
+  padding: 9px;
+
+  border-radius: 7px;
+
+  border: 1px solid #ccc;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .sos-card {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    text-align: center;
+  }
+
+  .sos-content {
+    flex-direction: column;
+  }
+
+  .sos-button {
+    width: 100%;
+  }
+
+  .location-card {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .location-btn {
+    width: 100%;
+  }
+
+  .leaflet-map {
+    height: 400px;
+  }
+
+  .map-legend {
+    position: relative;
+
+    left: auto;
+    bottom: auto;
+
+    margin-top: 10px;
+
+    box-shadow: none;
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .incident-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nearby-list {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================
+   LIVE SOS ALERT
+========================================= */
+
+.live-sos-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+  padding-top: 70px;
+
+  z-index: 9999;
+
+  animation: alertFadeIn 0.25s ease;
+}
+
+.live-sos-alert {
+  width: min(520px, 92%);
+
+  background: white;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.35);
+
+  border: 3px solid #d60000;
+
+  animation: alertShake 0.5s ease;
+}
+
+.live-sos-header {
+  background: #d60000;
+
+  color: white;
+
+  padding: 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+.live-sos-icon {
+  font-size: 48px;
+
+  animation: sosIconPulse 0.8s infinite;
+}
+
+.live-sos-header h2 {
+  margin: 0;
+
+  font-size: 25px;
+}
+
+.live-sos-header p {
+  margin: 5px 0 0;
+
+  opacity: 0.9;
+}
+
+.live-sos-body {
+  padding: 22px;
+}
+
+.live-sos-body p {
+  margin: 10px 0;
+
+  line-height: 1.5;
+}
+
+.sos-alert-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 20px;
+}
+
+.sos-alert-actions button {
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 11px 15px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  background: #1976d2;
+
+  color: white;
+}
+
+.sos-alert-actions button:hover {
+  opacity: 0.9;
+}
+
+.sos-alert-actions .dismiss-alert {
+  background: #555;
+}
+
+
+/* =========================================
+   LIVE MONITORING
+========================================= */
+
+.admin-title-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 15px;
+}
+
+.live-indicator {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+  color: #c62828;
+
+  letter-spacing: 0.5px;
+}
+
+.live-indicator span {
+  width: 9px;
+
+  height: 9px;
+
+  border-radius: 50%;
+
+  background: #d60000;
+
+  animation: livePulse 1s infinite;
+}
+
+
+/* =========================================
+   CRITICAL STAT
+========================================= */
+
+.critical-stat {
+  border: 2px solid #ff4d4d;
+
+  background: #fff5f5;
+}
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes alertFadeIn {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+@keyframes alertShake {
+
+  0% {
+    transform: translateY(-30px);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+
+}
+
+@keyframes sosIconPulse {
+
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+@keyframes livePulse {
+
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.3;
+    transform: scale(1.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+
+/* =========================================
+   MOBILE SOS ALERT
+========================================= */
+
+@media (max-width: 600px) {
+
+  .live-sos-overlay {
+    padding-top: 30px;
+  }
+
+  .live-sos-alert {
+    width: 94%;
+  }
+
+  .live-sos-header {
+    padding: 18px;
+  }
+
+  .live-sos-icon {
+    font-size: 38px;
+  }
+
+  .live-sos-header h2 {
+    font-size: 20px;
+  }
+
+  .sos-alert-actions {
+    flex-direction: column;
+  }
+
+  .sos-alert-actions button {
+    width: 100%;
+  }
+
+}
+
+/* =========================================
+   LIVE SOS ALERT
+========================================= */
+
+.live-sos-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.live-sos-alert {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  border: 3px solid #dc2626;
+}
+
+.live-sos-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: #dc2626;
+  color: white;
+}
+
+.live-sos-icon {
+  font-size: 42px;
+}
+
+.live-sos-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.live-sos-header p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.live-sos-body {
+  padding: 22px;
+}
+
+.live-sos-body p {
+  margin: 12px 0;
+  font-size: 16px;
+  color: #222;
+}
+
+.sos-alert-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.sos-alert-actions button {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  background: #2563eb;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.sos-alert-actions button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.sos-alert-actions .dismiss-alert {
+  background: #6b7280;
+}
+
+@media (max-width: 600px) {
+  .live-sos-overlay {
+    padding: 12px;
+  }
+
+  .live-sos-alert {
+    max-width: 100%;
+  }
+
+  .live-sos-header h2 {
+    font-size: 20px;
+  }
+
+  .sos-alert-actions {
+    flex-direction: column;
+  }
+
+  .sos-alert-actions button {
+    width: 100%;
+  }
+}
+/* =========================================
+   MY EMERGENCY REPORTS
+========================================= */
+
+.my-reports-card {
+  margin-top: 25px;
+  padding: 25px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.my-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.my-report-card {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.my-report-sos {
+  border: 2px solid #dc2626;
+  background: #fff5f5;
+}
+
+.my-report-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.my-report-header h3 {
+  margin: 0 0 8px;
+}
+
+.my-report-header p {
+  margin: 0;
+  color: #666;
+}
+
+.status-badge {
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-reported {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-assigned {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-in-progress {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.status-resolved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.my-report-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.status-progress {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0;
+  position: relative;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  color: #9ca3af;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-step span {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  font-weight: 700;
+}
+
+.progress-step.completed {
+  color: #16a34a;
+}
+
+.progress-step.completed span {
+  background: #16a34a;
+  color: white;
+}
+
+.progress-step small {
+  font-size: 11px;
+  text-align: center;
+}
+
+.view-location-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+
+.view-location-btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+
+  .my-report-header {
+    flex-direction: column;
+  }
+
+  .my-report-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .status-progress {
+    overflow-x: auto;
+    gap: 25px;
+  }
+
+}
+.analytics-container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.analytics-container h1 {
+    margin-bottom: 5px;
+}
+
+.analytics-subtitle {
+    margin-bottom: 25px;
+    opacity: 0.7;
+}
+
+.analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.analytics-card {
+    padding: 25px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.analytics-card h3 {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.analytics-card strong {
+    font-size: 32px;
+}
+
+.analytics-section {
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.progress-item {
+    display: grid;
+    grid-template-columns: 100px 1fr 40px;
+    align-items: center;
+    gap: 15px;
+    margin: 18px 0;
+}
+
+.progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: #ff4d4d;
+}
+
+.type-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.type-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 600px) {
+
+    .analytics-container {
+        padding: 15px;
+    }
+
+    .progress-item {
+        grid-template-columns: 70px 1fr 30px;
+        gap: 8px;
+    }
+}
+.analytics-btn {
+  padding: 9px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #2563eb;
+  color: white;
+}
+
+.analytics-btn:hover {
+  opacity: 0.9;
+}

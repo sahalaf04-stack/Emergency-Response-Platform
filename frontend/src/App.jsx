@@ -82,39 +82,66 @@ useEffect(() => {
   // LOCATION
   // ------------------------------------------------
 
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
+  
+    const getLocation = () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by this browser.");
+    return;
+  }
 
-    setLocationLoading(true);
+  setLocationLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      console.log("GPS LOCATION:", position.coords);
 
-        setLocationLoading(false);
-      },
-      (error) => {
-        console.error("Location error:", error);
+      setLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
 
-        setLocationLoading(false);
+      setLocationLoading(false);
+    },
+    (error) => {
+      console.error("GPS ERROR:", error);
 
-        alert(
-          "Unable to get your location. Please allow location permission."
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
+      setLocationLoading(false);
+
+      let message = "Unable to get your location.";
+
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          message =
+            "Location permission was denied.\n\n" +
+            "Please allow location permission for this website in your browser settings and try again.";
+          break;
+
+        case error.POSITION_UNAVAILABLE:
+          message =
+            "Your location is currently unavailable.\n\n" +
+            "Please turn on GPS/location services and try again.";
+          break;
+
+        case error.TIMEOUT:
+          message =
+            "Location request timed out.\n\n" +
+            "Please make sure GPS is enabled and try again.";
+          break;
+
+        default:
+          message =
+            "Unable to get your location. Please try again.";
       }
-    );
-  };
+
+      alert(message);
+    },
+    {
+      enableHighAccuracy: false,
+      timeout: 20000,
+      maximumAge: 60000,
+    }
+  );
+};
 
   // ------------------------------------------------
   // HEADERS

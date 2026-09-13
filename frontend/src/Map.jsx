@@ -26,7 +26,7 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const API = "http://localhost:8000/api";
+const API = import.meta.env.VITE_API_URL;
 
 // ------------------------------------------------
 // CUSTOM ICONS

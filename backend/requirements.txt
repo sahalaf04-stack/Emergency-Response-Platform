@@ -3,6 +3,7 @@ uvicorn
 pymongo
 python-dotenv
 pydantic
+email-validator
 requests
 python-jose[cryptography]
 bcrypt

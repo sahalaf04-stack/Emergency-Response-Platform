@@ -24,6 +24,20 @@ function App() {
   });
 
   const [newSOS, setNewSOS] = useState(null);
+  const [currentPath, setCurrentPath] = useState(
+  window.location.pathname
+);
+useEffect(() => {
+  const handlePopState = () => {
+    setCurrentPath(window.location.pathname);
+  };
+
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, []);
 
   // Stores SOS IDs that have already triggered an alert.
   const alertedSOSIds = useRef(new Set());
@@ -466,7 +480,7 @@ function App() {
   if (
   user &&
   user.role === "admin" &&
-  window.location.pathname === "/analytics"
+  currentPath === "/analytics"
 ) {
   return (
     <div className="app">
@@ -496,8 +510,9 @@ function App() {
           <button
             className="analytics-btn"
             onClick={() => {
-              window.location.href = "/";
-            }}
+  window.history.pushState({}, "", "/");
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}}
           >
             ← Dashboard
           </button>
@@ -681,15 +696,16 @@ function App() {
   </span>
 
   {user.role === "admin" && (
-    <button
-      className="analytics-btn"
-      onClick={() => {
-        window.location.href = "/analytics";
-      }}
-    >
-      📊 Analytics
-    </button>
-  )}
+  <button
+    className="analytics-btn"
+    onClick={() => {
+      window.history.pushState({}, "", "/analytics");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }}
+  >
+    📊 Analytics
+  </button>
+)}
 
   <button
     className="logout-btn"

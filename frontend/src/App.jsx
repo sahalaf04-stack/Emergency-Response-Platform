@@ -6,8 +6,7 @@ import Login from "./Login";
 import "./index.css";
 import Analytics from "./Analytics";
 
-const API = "http://localhost:8000/api";
-
+const API = import.meta.env.VITE_API_URL;
 function App() {
   const [user, setUser] = useState(null);
   const [incidents, setIncidents] = useState([]);

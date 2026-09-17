@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -18,16 +17,28 @@ function Login({ onLogin }) {
     e.preventDefault();
 
     setError("");
+
+    if (!API) {
+      setError("API URL is not configured.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isRegister) {
-        // REGISTER
-        await axios.post(`${API}/register`, {
-          name,
-          email,
-          password,
-        });
+        /* REGISTER */
+
+        const response = await axios.post(
+          `${API}/api/register`,
+          {
+            name,
+            email,
+            password,
+          }
+        );
+
+        console.log("Registration response:", response.data);
 
         alert("Registration successful! Please login.");
 
@@ -35,22 +46,38 @@ function Login({ onLogin }) {
         setName("");
         setPassword("");
       } else {
-        // LOGIN
-        const response = await axios.post(`${API}/login`, {
-          email,
-          password,
-        });
+        /* LOGIN */
+
+        const response = await axios.post(
+          `${API}/api/login`,
+          {
+            email,
+            password,
+          }
+        );
+
+        console.log("Login response:", response.data);
 
         const { token, user } = response.data;
 
+        /* Save JWT token */
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
 
+        /* Save user */
+        localStorage.setItem(
+          "user",
+          JSON.stringify(user)
+        );
+
+        /* Send user to App.jsx */
         onLogin(user);
       }
     } catch (err) {
+      console.error("Authentication error:", err);
+
       setError(
         err.response?.data?.detail ||
+          err.response?.data?.message ||
           "Something went wrong. Please try again."
       );
     } finally {
@@ -60,6 +87,7 @@ function Login({ onLogin }) {
 
   return (
     <div className="auth-page">
+
       <div className="auth-card">
 
         <div className="auth-logo">
@@ -84,6 +112,7 @@ function Login({ onLogin }) {
 
           {isRegister && (
             <div className="form-group">
+
               <label>Full Name</label>
 
               <input
@@ -95,10 +124,12 @@ function Login({ onLogin }) {
                 }
                 required
               />
+
             </div>
           )}
 
           <div className="form-group">
+
             <label>Email</label>
 
             <input
@@ -110,9 +141,11 @@ function Login({ onLogin }) {
               }
               required
             />
+
           </div>
 
           <div className="form-group">
+
             <label>Password</label>
 
             <input
@@ -125,6 +158,7 @@ function Login({ onLogin }) {
               required
               minLength={6}
             />
+
           </div>
 
           <button
@@ -160,6 +194,7 @@ function Login({ onLogin }) {
         </div>
 
       </div>
+
     </div>
   );
 }

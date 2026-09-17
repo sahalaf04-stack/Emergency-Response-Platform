@@ -97,7 +97,6 @@ const getServiceIcon = (type) => {
 // ------------------------------------------------
 
 function Map({ location, incidents = [] }) {
-
   if (!location) {
     return (
       <div className="map-message">
@@ -122,7 +121,6 @@ function MapContent({
   location,
   incidents = [],
 }) {
-
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -132,16 +130,15 @@ function MapContent({
   // ----------------------------------------------
 
   useEffect(() => {
-
     const getNearbyServices = async () => {
-
       try {
-
         setLoading(true);
         setError("");
 
+        // IMPORTANT:
+        // Backend route is /api/nearby
         const response = await axios.get(
-          `${API}/nearby`,
+          `${API}/api/nearby`,
           {
             params: {
               lat: location.lat,
@@ -160,9 +157,7 @@ function MapContent({
             ? response.data
             : []
         );
-
       } catch (err) {
-
         console.error(
           "Nearby services error:",
           err
@@ -173,16 +168,12 @@ function MapContent({
         );
 
         setPlaces([]);
-
       } finally {
-
         setLoading(false);
-
       }
     };
 
     getNearbyServices();
-
   }, [location.lat, location.lng]);
 
   // ----------------------------------------------
@@ -190,7 +181,6 @@ function MapContent({
   // ----------------------------------------------
 
   const getDirections = (lat, lng) => {
-
     const url =
       `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
@@ -206,7 +196,6 @@ function MapContent({
   // ----------------------------------------------
 
   const callService = (phone) => {
-
     if (!phone) {
       alert(
         "Phone number is not available for this service."
@@ -222,7 +211,6 @@ function MapContent({
   // ----------------------------------------------
 
   const getIncidentIcon = (incident) => {
-
     if (
       incident.is_sos === true ||
       incident.priority === "Critical"
@@ -267,11 +255,11 @@ function MapContent({
       >
 
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* USER LOCATION */}
+        {/* ================= USER LOCATION ================= */}
 
         <Marker
           position={[
@@ -280,9 +268,7 @@ function MapContent({
           ]}
           icon={userIcon}
         >
-
           <Popup>
-
             <strong>
               📍 Your Location
             </strong>
@@ -296,16 +282,13 @@ function MapContent({
 
             Longitude:{" "}
             {location.lng.toFixed(6)}
-
           </Popup>
-
         </Marker>
 
         {/* ================= INCIDENTS ================= */}
 
         {validIncidents.map(
           (incident) => (
-
             <Marker
               key={incident.id}
               position={[
@@ -316,17 +299,13 @@ function MapContent({
                 incident
               )}
             >
-
               <Popup>
-
                 <div className="popup-content">
 
                   <h3>
-
                     {incident.is_sos
                       ? "🆘 SOS ALERT"
                       : "🚨 Emergency"}
-
                   </h3>
 
                   <p>
@@ -351,14 +330,12 @@ function MapContent({
                   </p>
 
                   {incident.description && (
-
                     <p>
                       <strong>
                         Details:
                       </strong>{" "}
                       {incident.description}
                     </p>
-
                   )}
 
                   <button
@@ -374,11 +351,8 @@ function MapContent({
                   </button>
 
                 </div>
-
               </Popup>
-
             </Marker>
-
           )
         )}
 
@@ -397,7 +371,6 @@ function MapContent({
             }
 
             return (
-
               <Marker
                 key={`${place.name}-${index}`}
                 position={[
@@ -408,7 +381,6 @@ function MapContent({
                   place.type
                 )}
               >
-
                 <Popup>
 
                   <div className="popup-content">
@@ -427,7 +399,6 @@ function MapContent({
 
                     {place.distance !==
                       undefined && (
-
                       <p>
                         <strong>
                           Distance:
@@ -437,11 +408,9 @@ function MapContent({
                         ).toFixed(2)}{" "}
                         km
                       </p>
-
                     )}
 
                     {place.phone && (
-
                       <button
                         className="call-btn"
                         onClick={() =>
@@ -452,7 +421,6 @@ function MapContent({
                       >
                         📞 Call
                       </button>
-
                     )}
 
                     <button
@@ -470,9 +438,7 @@ function MapContent({
                   </div>
 
                 </Popup>
-
               </Marker>
-
             );
           }
         )}
@@ -544,12 +510,10 @@ function MapContent({
         {!loading &&
           !error &&
           places.length === 0 && (
-
             <p>
               No nearby emergency services
               found.
             </p>
-
           )}
 
         <div className="nearby-list">
@@ -565,6 +529,7 @@ function MapContent({
                 <div className="nearby-info">
 
                   <h4>
+
                     {place.type ===
                     "hospital"
                       ? "🏥"
@@ -578,8 +543,10 @@ function MapContent({
                         "shelter"
                       ? "🏠"
                       : "📍"}{" "}
+
                     {place.name ||
                       "Emergency Service"}
+
                   </h4>
 
                   <span>
@@ -588,7 +555,6 @@ function MapContent({
 
                   {place.distance !==
                     undefined && (
-
                     <strong>
                       📏{" "}
                       {Number(
@@ -596,7 +562,6 @@ function MapContent({
                       ).toFixed(2)}{" "}
                       km away
                     </strong>
-
                   )}
 
                 </div>
@@ -604,7 +569,6 @@ function MapContent({
                 <div className="nearby-actions">
 
                   {place.phone && (
-
                     <button
                       className="call-btn"
                       onClick={() =>
@@ -615,7 +579,6 @@ function MapContent({
                     >
                       📞 Call
                     </button>
-
                   )}
 
                   <button
@@ -633,7 +596,6 @@ function MapContent({
                 </div>
 
               </div>
-
             )
           )}
 

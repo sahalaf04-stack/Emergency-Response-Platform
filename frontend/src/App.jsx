@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Map from "./Map";
@@ -7,6 +6,7 @@ import "./index.css";
 import Analytics from "./Analytics";
 
 const API = import.meta.env.VITE_API_URL;
+
 function App() {
   const [user, setUser] = useState(null);
   const [incidents, setIncidents] = useState([]);
@@ -24,39 +24,50 @@ function App() {
   });
 
   const [newSOS, setNewSOS] = useState(null);
+
   const [currentPath, setCurrentPath] = useState(
-  window.location.pathname
-);
-useEffect(() => {
-  const handlePopState = () => {
-    setCurrentPath(window.location.pathname);
-  };
-
-  window.addEventListener("popstate", handlePopState);
-
-  return () => {
-    window.removeEventListener("popstate", handlePopState);
-  };
-}, []);
+    window.location.pathname
+  );
 
   // Stores SOS IDs that have already triggered an alert.
   const alertedSOSIds = useRef(new Set());
 
-  // Used to know when the first incident request has completed.
+  // Used to prevent old SOS alerts from showing when dashboard opens.
   const firstLoad = useRef(true);
 
   // ------------------------------------------------
-  // LOGIN
+  // ROUTE CHANGE
+  // ------------------------------------------------
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener(
+        "popstate",
+        handlePopState
+      );
+    };
+  }, []);
+
+  // ------------------------------------------------
+  // LOGIN / RESTORE SESSION
   // ------------------------------------------------
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    if (savedUser) {
+    if (savedUser && token) {
       try {
         setUser(JSON.parse(savedUser));
       } catch {
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
       }
     }
   }, []);
@@ -82,66 +93,76 @@ useEffect(() => {
   // LOCATION
   // ------------------------------------------------
 
-  
-    const getLocation = () => {
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported by this browser.");
-    return;
-  }
-
-  setLocationLoading(true);
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      console.log("GPS LOCATION:", position.coords);
-
-      setLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-
-      setLocationLoading(false);
-    },
-    (error) => {
-      console.error("GPS ERROR:", error);
-
-      setLocationLoading(false);
-
-      let message = "Unable to get your location.";
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          message =
-            "Location permission was denied.\n\n" +
-            "Please allow location permission for this website in your browser settings and try again.";
-          break;
-
-        case error.POSITION_UNAVAILABLE:
-          message =
-            "Your location is currently unavailable.\n\n" +
-            "Please turn on GPS/location services and try again.";
-          break;
-
-        case error.TIMEOUT:
-          message =
-            "Location request timed out.\n\n" +
-            "Please make sure GPS is enabled and try again.";
-          break;
-
-        default:
-          message =
-            "Unable to get your location. Please try again.";
-      }
-
-      alert(message);
-    },
-    {
-      enableHighAccuracy: false,
-      timeout: 20000,
-      maximumAge: 60000,
+  const getLocation = () => {
+    if (!navigator.geolocation) {
+      alert(
+        "Geolocation is not supported by this browser."
+      );
+      return;
     }
-  );
-};
+
+    setLocationLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log(
+          "GPS LOCATION:",
+          position.coords
+        );
+
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+
+        setLocationLoading(false);
+      },
+
+      (error) => {
+        console.error(
+          "GPS ERROR:",
+          error
+        );
+
+        setLocationLoading(false);
+
+        let message =
+          "Unable to get your location.";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message =
+              "Location permission was denied.\n\n" +
+              "Please allow location permission for this website in your browser settings and try again.";
+            break;
+
+          case error.POSITION_UNAVAILABLE:
+            message =
+              "Your location is currently unavailable.\n\n" +
+              "Please turn on GPS/location services and try again.";
+            break;
+
+          case error.TIMEOUT:
+            message =
+              "Location request timed out.\n\n" +
+              "Please make sure GPS is enabled and try again.";
+            break;
+
+          default:
+            message =
+              "Unable to get your location. Please try again.";
+        }
+
+        alert(message);
+      },
+
+      {
+        enableHighAccuracy: false,
+        timeout: 20000,
+        maximumAge: 60000,
+      }
+    );
+  };
 
   // ------------------------------------------------
   // HEADERS
@@ -169,7 +190,8 @@ useEffect(() => {
 
       if (!AudioContext) return;
 
-      const audioContext = new AudioContext();
+      const audioContext =
+        new AudioContext();
 
       const oscillator =
         audioContext.createOscillator();
@@ -178,9 +200,13 @@ useEffect(() => {
         audioContext.createGain();
 
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+
+      gainNode.connect(
+        audioContext.destination
+      );
 
       oscillator.type = "sine";
+
       oscillator.frequency.value = 900;
 
       gainNode.gain.setValueAtTime(
@@ -204,7 +230,9 @@ useEffect(() => {
         audioContext.currentTime + 0.5
       );
     } catch (error) {
-      console.log("Could not play alert sound.");
+      console.log(
+        "Could not play alert sound."
+      );
     }
   };
 
@@ -212,13 +240,25 @@ useEffect(() => {
   // BROWSER NOTIFICATION
   // ------------------------------------------------
 
-  const showBrowserNotification = (incident) => {
-    if (!("Notification" in window)) return;
+  const showBrowserNotification = (
+    incident
+  ) => {
+    if (!("Notification" in window)) {
+      return;
+    }
 
-    if (Notification.permission === "granted") {
-      new Notification("🚨 NEW SOS ALERT", {
-        body: `${incident.name || "User"} has activated an emergency SOS.`,
-      });
+    if (
+      Notification.permission ===
+      "granted"
+    ) {
+      new Notification(
+        "🚨 NEW SOS ALERT",
+        {
+          body: `${
+            incident.name || "User"
+          } has activated an emergency SOS.`,
+        }
+      );
     }
   };
 
@@ -226,66 +266,102 @@ useEffect(() => {
   // REQUEST NOTIFICATION PERMISSION
   // ------------------------------------------------
 
-  const requestNotificationPermission = async () => {
-    if (!("Notification" in window)) return;
-
-    if (Notification.permission === "default") {
-      try {
-        await Notification.requestPermission();
-      } catch (error) {
-        console.log("Notification permission error.");
+  const requestNotificationPermission =
+    async () => {
+      if (!("Notification" in window)) {
+        return;
       }
-    }
-  };
+
+      if (
+        Notification.permission ===
+        "default"
+      ) {
+        try {
+          await Notification.requestPermission();
+        } catch (error) {
+          console.log(
+            "Notification permission error."
+          );
+        }
+      }
+    };
 
   // ------------------------------------------------
-  // INCIDENTS
+  // GET INCIDENTS
   // ------------------------------------------------
 
   const getIncidents = async () => {
     try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
       const response = await axios.get(
-        `${API}/incidents`,
+        `${API}/api/incidents`,
         getHeaders()
       );
 
-      const data = response.data || [];
+      const data =
+        response.data || [];
+
+      console.log(
+        "INCIDENTS:",
+        data
+      );
 
       setIncidents(data);
 
-      // Do not alert existing incidents when
-      // the dashboard is opened for the first time.
+      // Do not alert old SOS incidents
+      // when dashboard first opens.
       if (firstLoad.current) {
         data
           .filter(
             (incident) =>
               incident.is_sos === true &&
-              incident.status !== "Resolved"
+              incident.status !==
+                "Resolved"
           )
           .forEach((incident) => {
-            alertedSOSIds.current.add(incident.id);
+            alertedSOSIds.current.add(
+              incident.id
+            );
           });
 
         firstLoad.current = false;
+
         return;
       }
 
       // Detect new SOS incidents.
-      if (user?.role === "admin") {
-        const latestSOS = data.find(
-          (incident) =>
-            incident.is_sos === true &&
-            incident.status !== "Resolved" &&
-            !alertedSOSIds.current.has(incident.id)
-        );
+      if (
+        user?.role === "admin"
+      ) {
+        const latestSOS =
+          data.find(
+            (incident) =>
+              incident.is_sos === true &&
+              incident.status !==
+                "Resolved" &&
+              !alertedSOSIds.current.has(
+                incident.id
+              )
+          );
 
         if (latestSOS) {
-          alertedSOSIds.current.add(latestSOS.id);
+          alertedSOSIds.current.add(
+            latestSOS.id
+          );
 
           setNewSOS(latestSOS);
 
           playSOSSound();
-          showBrowserNotification(latestSOS);
+
+          showBrowserNotification(
+            latestSOS
+          );
         }
       }
     } catch (error) {
@@ -294,14 +370,16 @@ useEffect(() => {
         error
       );
 
-      if (error.response?.status === 401) {
+      if (
+        error.response?.status === 401
+      ) {
         logout();
       }
     }
   };
 
   // ------------------------------------------------
-  // FORM
+  // FORM CHANGE
   // ------------------------------------------------
 
   const handleChange = (e) => {
@@ -312,41 +390,63 @@ useEffect(() => {
   };
 
   // ------------------------------------------------
-  // NORMAL REPORT
+  // NORMAL EMERGENCY REPORT
   // ------------------------------------------------
 
   const reportEmergency = async (e) => {
     e.preventDefault();
 
     if (!location) {
-      alert("Please get your location first.");
+      alert(
+        "Please get your location first."
+      );
       return;
     }
 
     if (!form.description.trim()) {
-      alert("Please describe the emergency.");
+      alert(
+        "Please describe the emergency."
+      );
       return;
     }
 
     try {
       setSubmitting(true);
 
-      const response = await axios.post(
-        `${API}/incidents`,
-        {
-          name: form.name || user.name,
-          phone: form.phone,
-          emergency_type: form.emergency_type,
-          description: form.description,
-          latitude: location.lat,
-          longitude: location.lng,
-        },
-        getHeaders()
+      const response =
+        await axios.post(
+          `${API}/api/incidents`,
+          {
+            name:
+              form.name ||
+              user.name,
+
+            phone: form.phone,
+
+            emergency_type:
+              form.emergency_type,
+
+            description:
+              form.description,
+
+            latitude:
+              location.lat,
+
+            longitude:
+              location.lng,
+          },
+          getHeaders()
+        );
+
+      console.log(
+        "Emergency response:",
+        response.data
       );
 
       alert(
         `Emergency reported successfully!\nPriority: ${
-          response.data.priority || "Assigned"
+          response.data.priority ||
+          "Assigned"
         }`
       );
 
@@ -357,9 +457,24 @@ useEffect(() => {
         description: "",
       });
 
-      getIncidents();
+      await getIncidents();
     } catch (error) {
-      console.error("Report error:", error);
+      console.error(
+        "Report error:",
+        error
+      );
+
+      if (
+        error.response?.status === 401
+      ) {
+        alert(
+          "Your session has expired. Please login again."
+        );
+
+        logout();
+
+        return;
+      }
 
       alert(
         error.response?.data?.detail ||
@@ -385,11 +500,12 @@ useEffect(() => {
       return;
     }
 
-    const confirmed = window.confirm(
-      "🚨 ACTIVATE SOS?\n\n" +
-        "Your current location will be shared with the emergency dashboard.\n\n" +
-        "Are you sure?"
-    );
+    const confirmed =
+      window.confirm(
+        "🚨 ACTIVATE SOS?\n\n" +
+          "Your current location will be shared with the emergency dashboard.\n\n" +
+          "Are you sure?"
+      );
 
     if (!confirmed) return;
 
@@ -398,16 +514,23 @@ useEffect(() => {
 
       await requestNotificationPermission();
 
-      const response = await axios.post(
-        `${API}/incidents/sos`,
-        {
-          name: user.name,
-          phone: form.phone || "",
-          latitude: location.lat,
-          longitude: location.lng,
-        },
-        getHeaders()
-      );
+      const response =
+        await axios.post(
+          `${API}/api/incidents/sos`,
+          {
+            name: user.name,
+
+            phone:
+              form.phone || "",
+
+            latitude:
+              location.lat,
+
+            longitude:
+              location.lng,
+          },
+          getHeaders()
+        );
 
       console.log(
         "SOS RESPONSE:",
@@ -422,9 +545,14 @@ useEffect(() => {
 
       await getIncidents();
     } catch (error) {
-      console.error("SOS ERROR:", error);
+      console.error(
+        "SOS ERROR:",
+        error
+      );
 
-      if (error.response?.status === 401) {
+      if (
+        error.response?.status === 401
+      ) {
         alert(
           "Your session has expired. Please login again."
         );
@@ -450,7 +578,7 @@ useEffect(() => {
   };
 
   // ------------------------------------------------
-  // ADMIN STATUS
+  // UPDATE INCIDENT STATUS
   // ------------------------------------------------
 
   const updateStatus = async (
@@ -459,19 +587,41 @@ useEffect(() => {
   ) => {
     try {
       await axios.put(
-        `${API}/incidents/${incidentId}?status=${encodeURIComponent(
+        `${API}/api/incidents/${incidentId}?status=${encodeURIComponent(
           status
         )}`,
         {},
         getHeaders()
       );
 
-      getIncidents();
+      await getIncidents();
     } catch (error) {
       console.error(
         "Status update error:",
         error
       );
+
+      if (
+        error.response?.status === 401
+      ) {
+        alert(
+          "Your session has expired. Please login again."
+        );
+
+        logout();
+
+        return;
+      }
+
+      if (
+        error.response?.status === 403
+      ) {
+        alert(
+          "Only administrators can update incident status."
+        );
+
+        return;
+      }
 
       alert(
         error.response?.data?.detail ||
@@ -486,100 +636,142 @@ useEffect(() => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+
+    localStorage.removeItem(
+      "user"
+    );
 
     setUser(null);
+
     setLocation(null);
+
     setIncidents([]);
+
     setNewSOS(null);
 
     alertedSOSIds.current.clear();
+
     firstLoad.current = true;
   };
 
   // ------------------------------------------------
-  // LOGIN
+  // LOGIN SCREEN
   // ------------------------------------------------
 
   if (!user) {
-    return <Login onLogin={setUser} />;
+    return (
+      <Login
+        onLogin={(loggedInUser) => {
+          setUser(loggedInUser);
+
+          firstLoad.current = true;
+          alertedSOSIds.current.clear();
+        }}
+      />
+    );
   }
+
+  // ------------------------------------------------
+  // ANALYTICS PAGE
+  // ------------------------------------------------
+
   if (
-  user &&
-  user.role === "admin" &&
-  currentPath === "/analytics"
-) {
-  return (
-    <div className="app">
+    user.role === "admin" &&
+    currentPath === "/analytics"
+  ) {
+    return (
+      <div className="app">
 
-      <header className="header">
+        <header className="header">
 
-        <div>
-          <h1>
-            🚨 Emergency Response
-          </h1>
+          <div>
+            <h1>
+              🚨 Emergency Response
+            </h1>
 
-          <p>
-            Smart Emergency Assistance Platform
-          </p>
-        </div>
+            <p>
+              Smart Emergency Assistance Platform
+            </p>
+          </div>
 
-        <div className="user-section">
+          <div className="user-section">
 
-          <span>
-            👤 {user.name}
-          </span>
+            <span>
+              👤 {user.name}
+            </span>
 
-          <span className="role-badge">
-            {user.role}
-          </span>
+            <span className="role-badge">
+              {user.role}
+            </span>
 
-          <button
-            className="analytics-btn"
-            onClick={() => {
-  window.history.pushState({}, "", "/");
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}}
-          >
-            ← Dashboard
-          </button>
+            <button
+              className="analytics-btn"
+              onClick={() => {
+                window.history.pushState(
+                  {},
+                  "",
+                  "/"
+                );
 
-          <button
-            className="logout-btn"
-            onClick={logout}
-          >
-            Logout
-          </button>
+                window.dispatchEvent(
+                  new PopStateEvent(
+                    "popstate"
+                  )
+                );
+              }}
+            >
+              ← Dashboard
+            </button>
 
-        </div>
+            <button
+              className="logout-btn"
+              onClick={logout}
+            >
+              Logout
+            </button>
 
-      </header>
+          </div>
 
-      <Analytics />
+        </header>
 
-    </div>
-  );
-}
+        <Analytics />
+
+      </div>
+    );
+  }
 
   // ------------------------------------------------
   // STATS
   // ------------------------------------------------
 
-  const total = incidents.length;
+  const total =
+    incidents.length;
 
-  const active = incidents.filter(
-    (item) => item.status !== "Resolved"
-  ).length;
+  const active =
+    incidents.filter(
+      (item) =>
+        item.status !==
+        "Resolved"
+    ).length;
 
-  const resolved = incidents.filter(
-    (item) => item.status === "Resolved"
-  ).length;
+  const resolved =
+    incidents.filter(
+      (item) =>
+        item.status ===
+        "Resolved"
+    ).length;
 
-  const critical = incidents.filter(
-    (item) =>
-      item.priority === "Critical" ||
-      item.is_sos === true
-  ).length;
+  const critical =
+    incidents.filter(
+      (item) =>
+        item.priority ===
+          "Critical" ||
+        item.is_sos === true
+    ).length;
+
+  // ------------------------------------------------
+  // MAIN UI
+  // ------------------------------------------------
 
   return (
     <div className="app">
@@ -588,111 +780,112 @@ useEffect(() => {
           LIVE SOS ALERT
       ========================================= */}
 
-      {newSOS && user.role === "admin" && (
+      {newSOS &&
+        user.role === "admin" && (
+          <div className="live-sos-overlay">
 
-        <div className="live-sos-overlay">
+            <div className="live-sos-alert">
 
-          <div className="live-sos-alert">
+              <div className="live-sos-header">
 
-            <div className="live-sos-header">
+                <span className="live-sos-icon">
+                  🆘
+                </span>
 
-              <span className="live-sos-icon">
-                🆘
-              </span>
+                <div>
 
-              <div>
+                  <h2>
+                    NEW SOS ALERT
+                  </h2>
 
-                <h2>
-                  NEW SOS ALERT
-                </h2>
+                  <p>
+                    Immediate attention required
+                  </p>
 
-                <p>
-                  Immediate attention required
-                </p>
+                </div>
 
               </div>
 
-            </div>
+              <div className="live-sos-body">
 
-            <div className="live-sos-body">
-
-              <p>
-                <strong>
-                  👤 Person:
-                </strong>{" "}
-                {newSOS.name}
-              </p>
-
-              {newSOS.phone && (
                 <p>
                   <strong>
-                    📞 Phone:
+                    👤 Person:
                   </strong>{" "}
-                  {newSOS.phone}
+                  {newSOS.name}
                 </p>
-              )}
-
-              <p>
-                <strong>
-                  🚨 Priority:
-                </strong>{" "}
-                CRITICAL
-              </p>
-
-              <p>
-                <strong>
-                  📍 Location:
-                </strong>{" "}
-                {Number(
-                  newSOS.latitude
-                ).toFixed(5)}
-                ,{" "}
-                {Number(
-                  newSOS.longitude
-                ).toFixed(5)}
-              </p>
-
-              <div className="sos-alert-actions">
-
-                <button
-                  onClick={() => {
-                    window.open(
-                      `https://www.google.com/maps/dir/?api=1&destination=${newSOS.latitude},${newSOS.longitude}`,
-                      "_blank",
-                      "noopener,noreferrer"
-                    );
-                  }}
-                >
-                  🧭 View Location
-                </button>
 
                 {newSOS.phone && (
-                  <button
-                    onClick={() => {
-                      window.location.href =
-                        `tel:${newSOS.phone}`;
-                    }}
-                  >
-                    📞 Call
-                  </button>
+                  <p>
+                    <strong>
+                      📞 Phone:
+                    </strong>{" "}
+                    {newSOS.phone}
+                  </p>
                 )}
 
-                <button
-                  className="dismiss-alert"
-                  onClick={closeSOSAlert}
-                >
-                  Dismiss
-                </button>
+                <p>
+                  <strong>
+                    🚨 Priority:
+                  </strong>{" "}
+                  CRITICAL
+                </p>
+
+                <p>
+                  <strong>
+                    📍 Location:
+                  </strong>{" "}
+                  {Number(
+                    newSOS.latitude
+                  ).toFixed(5)}
+                  ,{" "}
+                  {Number(
+                    newSOS.longitude
+                  ).toFixed(5)}
+                </p>
+
+                <div className="sos-alert-actions">
+
+                  <button
+                    onClick={() => {
+                      window.open(
+                        `https://www.google.com/maps/dir/?api=1&destination=${newSOS.latitude},${newSOS.longitude}`,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }}
+                  >
+                    🧭 View Location
+                  </button>
+
+                  {newSOS.phone && (
+                    <button
+                      onClick={() => {
+                        window.location.href =
+                          `tel:${newSOS.phone}`;
+                      }}
+                    >
+                      📞 Call
+                    </button>
+                  )}
+
+                  <button
+                    className="dismiss-alert"
+                    onClick={
+                      closeSOSAlert
+                    }
+                  >
+                    Dismiss
+                  </button>
+
+                </div>
 
               </div>
 
             </div>
 
           </div>
-
-        </div>
-
-      )}
+        )}
 
       {/* =========================================
           HEADER
@@ -714,34 +907,43 @@ useEffect(() => {
 
         <div className="user-section">
 
-  <span>
-    👤 {user.name}
-  </span>
+          <span>
+            👤 {user.name}
+          </span>
 
-  <span className="role-badge">
-    {user.role}
-  </span>
+          <span className="role-badge">
+            {user.role}
+          </span>
 
-  {user.role === "admin" && (
-  <button
-    className="analytics-btn"
-    onClick={() => {
-      window.history.pushState({}, "", "/analytics");
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    }}
-  >
-    📊 Analytics
-  </button>
-)}
+          {user.role === "admin" && (
+            <button
+              className="analytics-btn"
+              onClick={() => {
+                window.history.pushState(
+                  {},
+                  "",
+                  "/analytics"
+                );
 
-  <button
-    className="logout-btn"
-    onClick={logout}
-  >
-    Logout
-  </button>
+                window.dispatchEvent(
+                  new PopStateEvent(
+                    "popstate"
+                  )
+                );
+              }}
+            >
+              📊 Analytics
+            </button>
+          )}
 
-</div>
+          <button
+            className="logout-btn"
+            onClick={logout}
+          >
+            Logout
+          </button>
+
+        </div>
 
       </header>
 
@@ -751,7 +953,9 @@ useEffect(() => {
 
       <main className="container">
 
-        {/* SOS */}
+        {/* =====================================
+            SOS
+        ===================================== */}
 
         <section className="sos-card">
 
@@ -793,7 +997,9 @@ useEffect(() => {
 
         </section>
 
-        {/* LOCATION */}
+        {/* =====================================
+            LOCATION
+        ===================================== */}
 
         <section className="location-card">
 
@@ -804,7 +1010,6 @@ useEffect(() => {
             </h3>
 
             {location ? (
-
               <p>
 
                 Latitude:{" "}
@@ -820,13 +1025,10 @@ useEffect(() => {
                 </strong>
 
               </p>
-
             ) : (
-
               <p>
                 Location not available
               </p>
-
             )}
 
           </div>
@@ -843,7 +1045,9 @@ useEffect(() => {
 
         </section>
 
-        {/* REPORT */}
+        {/* =====================================
+            REPORT EMERGENCY
+        ===================================== */}
 
         <section className="report-card">
 
@@ -855,7 +1059,11 @@ useEffect(() => {
             Provide details about the emergency.
           </p>
 
-          <form onSubmit={reportEmergency}>
+          <form
+            onSubmit={
+              reportEmergency
+            }
+          >
 
             <div className="form-grid">
 
@@ -869,8 +1077,12 @@ useEffect(() => {
                   type="text"
                   name="name"
                   value={form.name}
-                  onChange={handleChange}
-                  placeholder={user.name}
+                  onChange={
+                    handleChange
+                  }
+                  placeholder={
+                    user.name
+                  }
                 />
 
               </div>
@@ -885,7 +1097,9 @@ useEffect(() => {
                   type="tel"
                   name="phone"
                   value={form.phone}
-                  onChange={handleChange}
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Enter phone number"
                 />
 
@@ -899,8 +1113,12 @@ useEffect(() => {
 
                 <select
                   name="emergency_type"
-                  value={form.emergency_type}
-                  onChange={handleChange}
+                  value={
+                    form.emergency_type
+                  }
+                  onChange={
+                    handleChange
+                  }
                 >
 
                   <option value="Medical">
@@ -935,8 +1153,12 @@ useEffect(() => {
 
                 <textarea
                   name="description"
-                  value={form.description}
-                  onChange={handleChange}
+                  value={
+                    form.description
+                  }
+                  onChange={
+                    handleChange
+                  }
                   placeholder="Describe what happened..."
                   rows="4"
                 />
@@ -959,7 +1181,9 @@ useEffect(() => {
 
         </section>
 
-        {/* MAP */}
+        {/* =====================================
+            MAP
+        ===================================== */}
 
         <section className="map-card">
 
@@ -981,14 +1205,11 @@ useEffect(() => {
           </div>
 
           {location ? (
-
             <Map
               location={location}
               incidents={incidents}
             />
-
           ) : (
-
             <div className="map-message">
 
               📍 Waiting for your location...
@@ -1003,183 +1224,233 @@ useEffect(() => {
               </button>
 
             </div>
-
           )}
 
         </section>
+
         {/* =====================================
-    MY EMERGENCY REPORTS
-===================================== */}
+            MY EMERGENCY REPORTS
+        ===================================== */}
 
-{user.role !== "admin" && (
+        {user.role !== "admin" && (
 
-  <section className="my-reports-card">
+          <section className="my-reports-card">
 
-    <div className="section-heading">
+            <div className="section-heading">
 
-      <div>
+              <div>
 
-        <h2>
-          📋 My Emergency Reports
-        </h2>
+                <h2>
+                  📋 My Emergency Reports
+                </h2>
 
-        <p>
-          Track the status of your reported emergencies.
-        </p>
-
-      </div>
-
-    </div>
-
-    {incidents.filter(
-      (incident) =>
-        incident.name === user.name
-    ).length === 0 ? (
-
-      <div className="empty-message">
-        You have not reported any emergencies yet.
-      </div>
-
-    ) : (
-
-      <div className="my-reports-list">
-
-        {incidents
-          .filter(
-            (incident) =>
-              incident.name === user.name
-          )
-          .map((incident) => (
-
-            <div
-              className={`my-report-card ${
-                incident.is_sos
-                  ? "my-report-sos"
-                  : ""
-              }`}
-              key={incident.id}
-            >
-
-              <div className="my-report-header">
-
-                <div>
-
-                  <h3>
-                    {incident.is_sos
-                      ? "🆘 SOS Emergency"
-                      : `🚨 ${incident.emergency_type}`}
-                  </h3>
-
-                  <p>
-                    {incident.description ||
-                      "SOS emergency activated."}
-                  </p>
-
-                </div>
-
-                <span
-                  className={`status-badge status-${incident.status
-                    ?.toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                >
-                  {incident.status}
-                </span>
+                <p>
+                  Track the status of your
+                  reported emergencies.
+                </p>
 
               </div>
-
-              <div className="my-report-details">
-
-                <span>
-                  <strong>Priority:</strong>{" "}
-                  {incident.priority}
-                </span>
-
-                <span>
-                  <strong>Location:</strong>{" "}
-                  {Number(incident.latitude).toFixed(5)},
-                  {" "}
-                  {Number(incident.longitude).toFixed(5)}
-                </span>
-
-              </div>
-
-              <div className="status-progress">
-
-                <div
-                  className={
-                    incident.status === "Reported" ||
-                    incident.status === "Assigned" ||
-                    incident.status === "In Progress" ||
-                    incident.status === "Resolved"
-                      ? "progress-step completed"
-                      : "progress-step"
-                  }
-                >
-                  <span>1</span>
-                  <small>Reported</small>
-                </div>
-
-                <div
-                  className={
-                    incident.status === "Assigned" ||
-                    incident.status === "In Progress" ||
-                    incident.status === "Resolved"
-                      ? "progress-step completed"
-                      : "progress-step"
-                  }
-                >
-                  <span>2</span>
-                  <small>Assigned</small>
-                </div>
-
-                <div
-                  className={
-                    incident.status === "In Progress" ||
-                    incident.status === "Resolved"
-                      ? "progress-step completed"
-                      : "progress-step"
-                  }
-                >
-                  <span>3</span>
-                  <small>Responding</small>
-                </div>
-
-                <div
-                  className={
-                    incident.status === "Resolved"
-                      ? "progress-step completed"
-                      : "progress-step"
-                  }
-                >
-                  <span>4</span>
-                  <small>Resolved</small>
-                </div>
-
-              </div>
-
-              <button
-                className="view-location-btn"
-                onClick={() => {
-                  window.open(
-                    `https://www.google.com/maps/dir/?api=1&destination=${incident.latitude},${incident.longitude}`,
-                    "_blank"
-                  );
-                }}
-              >
-                📍 View Location
-              </button>
 
             </div>
 
-          ))}
+            {incidents.filter(
+              (incident) =>
+                incident.name ===
+                user.name
+            ).length === 0 ? (
 
-      </div>
+              <div className="empty-message">
+                You have not reported any
+                emergencies yet.
+              </div>
 
-    )}
+            ) : (
 
-  </section>
+              <div className="my-reports-list">
 
-)}
+                {incidents
+                  .filter(
+                    (incident) =>
+                      incident.name ===
+                      user.name
+                  )
+                  .map(
+                    (incident) => (
+
+                      <div
+                        className={`my-report-card ${
+                          incident.is_sos
+                            ? "my-report-sos"
+                            : ""
+                        }`}
+                        key={
+                          incident.id
+                        }
+                      >
+
+                        <div className="my-report-header">
+
+                          <div>
+
+                            <h3>
+                              {incident.is_sos
+                                ? "🆘 SOS Emergency"
+                                : `🚨 ${incident.emergency_type}`}
+                            </h3>
+
+                            <p>
+                              {incident.description ||
+                                "SOS emergency activated."}
+                            </p>
+
+                          </div>
+
+                          <span
+                            className={`status-badge status-${incident.status
+                              ?.toLowerCase()
+                              .replace(
+                                /\s+/g,
+                                "-"
+                              )}`}
+                          >
+                            {incident.status}
+                          </span>
+
+                        </div>
+
+                        <div className="my-report-details">
+
+                          <span>
+                            <strong>
+                              Priority:
+                            </strong>{" "}
+                            {incident.priority}
+                          </span>
+
+                          <span>
+                            <strong>
+                              Location:
+                            </strong>{" "}
+                            {Number(
+                              incident.latitude
+                            ).toFixed(5)}
+                            ,{" "}
+                            {Number(
+                              incident.longitude
+                            ).toFixed(5)}
+                          </span>
+
+                        </div>
+
+                        <div className="status-progress">
+
+                          <div
+                            className={
+                              incident.status ===
+                                "Reported" ||
+                              incident.status ===
+                                "Assigned" ||
+                              incident.status ===
+                                "In Progress" ||
+                              incident.status ===
+                                "Resolved"
+                                ? "progress-step completed"
+                                : "progress-step"
+                            }
+                          >
+                            <span>
+                              1
+                            </span>
+
+                            <small>
+                              Reported
+                            </small>
+                          </div>
+
+                          <div
+                            className={
+                              incident.status ===
+                                "Assigned" ||
+                              incident.status ===
+                                "In Progress" ||
+                              incident.status ===
+                                "Resolved"
+                                ? "progress-step completed"
+                                : "progress-step"
+                            }
+                          >
+                            <span>
+                              2
+                            </span>
+
+                            <small>
+                              Assigned
+                            </small>
+                          </div>
+
+                          <div
+                            className={
+                              incident.status ===
+                                "In Progress" ||
+                              incident.status ===
+                                "Resolved"
+                                ? "progress-step completed"
+                                : "progress-step"
+                            }
+                          >
+                            <span>
+                              3
+                            </span>
+
+                            <small>
+                              Responding
+                            </small>
+                          </div>
+
+                          <div
+                            className={
+                              incident.status ===
+                                "Resolved"
+                                ? "progress-step completed"
+                                : "progress-step"
+                            }
+                          >
+                            <span>
+                              4
+                            </span>
+
+                            <small>
+                              Resolved
+                            </small>
+                          </div>
+
+                        </div>
+
+                        <button
+                          className="view-location-btn"
+                          onClick={() => {
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&destination=${incident.latitude},${incident.longitude}`,
+                              "_blank",
+                              "noopener,noreferrer"
+                            );
+                          }}
+                        >
+                          📍 View Location
+                        </button>
+
+                      </div>
+
+                    )
+                  )}
+
+              </div>
+
+            )}
+
+          </section>
+
+        )}
 
         {/* =====================================
             ADMIN DASHBOARD
@@ -1198,8 +1469,11 @@ useEffect(() => {
                 </h2>
 
                 <span className="live-indicator">
+
                   <span></span>
+
                   LIVE MONITORING
+
                 </span>
 
               </div>
@@ -1211,27 +1485,67 @@ useEffect(() => {
             <div className="stats-grid">
 
               <div className="stat-box">
-                <span>📋</span>
-                <strong>{total}</strong>
-                <p>Total</p>
+
+                <span>
+                  📋
+                </span>
+
+                <strong>
+                  {total}
+                </strong>
+
+                <p>
+                  Total
+                </p>
+
               </div>
 
               <div className="stat-box">
-                <span>🚨</span>
-                <strong>{active}</strong>
-                <p>Active</p>
+
+                <span>
+                  🚨
+                </span>
+
+                <strong>
+                  {active}
+                </strong>
+
+                <p>
+                  Active
+                </p>
+
               </div>
 
               <div className="stat-box critical-stat">
-                <span>🆘</span>
-                <strong>{critical}</strong>
-                <p>Critical</p>
+
+                <span>
+                  🆘
+                </span>
+
+                <strong>
+                  {critical}
+                </strong>
+
+                <p>
+                  Critical
+                </p>
+
               </div>
 
               <div className="stat-box">
-                <span>✅</span>
-                <strong>{resolved}</strong>
-                <p>Resolved</p>
+
+                <span>
+                  ✅
+                </span>
+
+                <strong>
+                  {resolved}
+                </strong>
+
+                <p>
+                  Resolved
+                </p>
+
               </div>
 
             </div>
@@ -1263,7 +1577,9 @@ useEffect(() => {
                           ? "critical-incident"
                           : ""
                       }`}
-                      key={incident.id}
+                      key={
+                        incident.id
+                      }
                     >
 
                       <div className="incident-header">
@@ -1279,54 +1595,82 @@ useEffect(() => {
                           </h3>
 
                           <span>
-                            {incident.emergency_type}
+                            {
+                              incident.emergency_type
+                            }
                           </span>
 
                         </div>
 
                         <span className="priority-badge">
-                          {incident.priority}
+
+                          {
+                            incident.priority
+                          }
+
                         </span>
 
                       </div>
 
                       <p>
+
                         <strong>
                           Name:
                         </strong>{" "}
-                        {incident.name}
+
+                        {
+                          incident.name
+                        }
+
                       </p>
 
                       {incident.phone && (
 
                         <p>
+
                           <strong>
                             Phone:
                           </strong>{" "}
-                          {incident.phone}
+
+                          {
+                            incident.phone
+                          }
+
                         </p>
 
                       )}
 
                       <p>
+
                         <strong>
                           Description:
                         </strong>{" "}
-                        {incident.description ||
-                          "SOS emergency"}
+
+                        {
+                          incident.description ||
+                          "SOS emergency"
+                        }
+
                       </p>
 
                       <p>
+
                         <strong>
                           Status:
                         </strong>{" "}
-                        {incident.status}
+
+                        {
+                          incident.status
+                        }
+
                       </p>
 
                       <div className="status-actions">
 
                         <select
-                          value={incident.status}
+                          value={
+                            incident.status
+                          }
                           onChange={(e) =>
                             updateStatus(
                               incident.id,
@@ -1369,6 +1713,10 @@ useEffect(() => {
         )}
 
       </main>
+
+      {/* =========================================
+          FOOTER
+      ========================================= */}
 
       <footer className="footer">
 

@@ -1,5 +1,7 @@
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from pydantic import BaseModel, EmailStr
 from pymongo import MongoClient
@@ -50,6 +52,7 @@ app = FastAPI(
 # ============================================================
 # CORS
 # ============================================================
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -58,7 +61,6 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://emergency-response-platform-two.vercel.app",
-        "https://emergency-response-platform-two.vercel.app/"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -71,6 +73,7 @@ app.add_middleware(
 # ============================================================
 
 try:
+
     client = MongoClient(
         MONGO_URI,
         serverSelectionTimeoutMS=5000
@@ -86,7 +89,11 @@ try:
     print("MongoDB connected successfully.")
 
 except Exception as error:
-    print("MongoDB connection failed:", error)
+
+    print(
+        "MongoDB connection failed:",
+        error
+    )
 
     client = None
     db = None
@@ -99,17 +106,20 @@ except Exception as error:
 # ============================================================
 
 class RegisterUser(BaseModel):
+
     name: str
     email: EmailStr
     password: str
 
 
 class LoginUser(BaseModel):
+
     email: EmailStr
     password: str
 
 
 class Incident(BaseModel):
+
     name: str
     phone: str = ""
     emergency_type: str
@@ -119,6 +129,7 @@ class Incident(BaseModel):
 
 
 class SOSRequest(BaseModel):
+
     name: str
     phone: str = ""
     latitude: float
@@ -131,7 +142,11 @@ class SOSRequest(BaseModel):
 
 def check_database():
 
-    if users_collection is None or incidents_collection is None:
+    if (
+        users_collection is None
+        or incidents_collection is None
+    ):
+
         raise HTTPException(
             status_code=500,
             detail="MongoDB is not connected."
@@ -146,8 +161,8 @@ def hash_password(password: str) -> str:
 
     password_bytes = password.encode("utf-8")
 
-    # bcrypt supports maximum 72 bytes
     if len(password_bytes) > 72:
+
         raise HTTPException(
             status_code=400,
             detail="Password cannot be longer than 72 bytes."
@@ -177,6 +192,7 @@ def verify_password(
         )
 
     except Exception:
+
         return False
 
 
@@ -188,10 +204,11 @@ def create_access_token(data: dict):
 
     to_encode = data.copy()
 
-    expire = datetime.now(
-        timezone.utc
-    ) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    expire = (
+        datetime.now(timezone.utc)
+        + timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     )
 
     to_encode.update({
@@ -207,29 +224,17 @@ def create_access_token(data: dict):
     return token
 
 
-def get_current_user(token: str = Depends(
-    lambda: None
-)):
-    """
-    Placeholder.
-
-    The actual token extraction is handled below
-    using the Authorization header.
-    """
-    return None
-
-
 # ============================================================
-# TOKEN EXTRACTION
+# TOKEN AUTHENTICATION
 # ============================================================
-
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 security = HTTPBearer()
 
 
 def authenticate_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(
+        security
+    )
 ):
 
     token = credentials.credentials
@@ -245,6 +250,7 @@ def authenticate_user(
         user_id = payload.get("user_id")
 
         if user_id is None:
+
             raise HTTPException(
                 status_code=401,
                 detail="Invalid authentication token."
@@ -257,6 +263,7 @@ def authenticate_user(
         })
 
         if user is None:
+
             raise HTTPException(
                 status_code=401,
                 detail="User not found."
@@ -270,6 +277,10 @@ def authenticate_user(
             status_code=401,
             detail="Invalid or expired token."
         )
+
+    except HTTPException:
+
+        raise
 
     except Exception:
 
@@ -314,14 +325,17 @@ def calculate_priority(
     ]
 
     if emergency_type == "sos":
+
         return "Critical"
 
     if emergency_type in critical_types:
+
         return "Critical"
 
     for keyword in high_keywords:
 
         if keyword in description:
+
             return "High"
 
     return "Medium"
@@ -414,7 +428,9 @@ def health_check():
 # ============================================================
 
 @app.post("/api/register")
-def register_user(user: RegisterUser):
+def register_user(
+    user: RegisterUser
+):
 
     check_database()
 
@@ -443,7 +459,9 @@ def register_user(user: RegisterUser):
 
         "role": "user",
 
-        "created_at": datetime.now(timezone.utc)
+        "created_at": datetime.now(
+            timezone.utc
+        )
     }
 
     result = users_collection.insert_one(
@@ -455,9 +473,15 @@ def register_user(user: RegisterUser):
         "message": "Registration successful",
 
         "user": {
-            "id": str(result.inserted_id),
+
+            "id": str(
+                result.inserted_id
+            ),
+
             "name": user.name,
+
             "email": user.email.lower(),
+
             "role": "user"
         }
     }
@@ -468,7 +492,9 @@ def register_user(user: RegisterUser):
 # ============================================================
 
 @app.post("/api/login")
-def login_user(user: LoginUser):
+def login_user(
+    user: LoginUser
+):
 
     check_database()
 
@@ -611,23 +637,29 @@ def create_incident(
 
     return {
 
-        "message": "Emergency reported successfully",
+        "message":
+            "Emergency reported successfully",
 
         "incident": {
 
-            "id": str(result.inserted_id),
+            "id": str(
+                result.inserted_id
+            ),
 
             "name": incident.name,
 
-            "emergency_type": incident.emergency_type,
+            "emergency_type":
+                incident.emergency_type,
 
             "priority": priority,
 
             "status": "Reported",
 
-            "latitude": incident.latitude,
+            "latitude":
+                incident.latitude,
 
-            "longitude": incident.longitude
+            "longitude":
+                incident.longitude
         }
     }
 
@@ -656,7 +688,8 @@ def activate_sos(
 
         "emergency_type": "SOS",
 
-        "description": "Emergency SOS activated",
+        "description":
+            "Emergency SOS activated",
 
         "latitude": sos.latitude,
 
@@ -679,11 +712,14 @@ def activate_sos(
 
     return {
 
-        "message": "SOS activated successfully",
+        "message":
+            "SOS activated successfully",
 
         "incident": {
 
-            "id": str(result.inserted_id),
+            "id": str(
+                result.inserted_id
+            ),
 
             "name": sos.name,
 
@@ -723,19 +759,27 @@ def get_incidents(
     if user_role == "admin":
 
         incidents = list(
-            incidents_collection.find()
-            .sort("created_at", -1)
+            incidents_collection
+            .find()
+            .sort(
+                "created_at",
+                -1
+            )
         )
 
     else:
 
         incidents = list(
-            incidents_collection.find({
+            incidents_collection
+            .find({
                 "user_id": str(
                     current_user["_id"]
                 )
             })
-            .sort("created_at", -1)
+            .sort(
+                "created_at",
+                -1
+            )
         )
 
     result = []
@@ -762,42 +806,50 @@ def get_incidents(
                 ""
             ),
 
-            "emergency_type": incident.get(
-                "emergency_type",
-                ""
-            ),
+            "emergency_type":
+                incident.get(
+                    "emergency_type",
+                    ""
+                ),
 
-            "description": incident.get(
-                "description",
-                ""
-            ),
+            "description":
+                incident.get(
+                    "description",
+                    ""
+                ),
 
-            "latitude": incident.get(
-                "latitude"
-            ),
+            "latitude":
+                incident.get(
+                    "latitude"
+                ),
 
-            "longitude": incident.get(
-                "longitude"
-            ),
+            "longitude":
+                incident.get(
+                    "longitude"
+                ),
 
-            "priority": incident.get(
-                "priority",
-                "Medium"
-            ),
+            "priority":
+                incident.get(
+                    "priority",
+                    "Medium"
+                ),
 
-            "status": incident.get(
-                "status",
-                "Reported"
-            ),
+            "status":
+                incident.get(
+                    "status",
+                    "Reported"
+                ),
 
-            "is_sos": incident.get(
-                "is_sos",
-                False
-            ),
+            "is_sos":
+                incident.get(
+                    "is_sos",
+                    False
+                ),
 
-            "created_at": incident.get(
-                "created_at"
-            )
+            "created_at":
+                incident.get(
+                    "created_at"
+                )
         })
 
     return result
@@ -843,15 +895,20 @@ def update_incident_status(
         result = incidents_collection.update_one(
 
             {
-                "_id": ObjectId(incident_id)
+                "_id": ObjectId(
+                    incident_id
+                )
             },
 
             {
                 "$set": {
+
                     "status": status,
-                    "updated_at": datetime.now(
-                        timezone.utc
-                    )
+
+                    "updated_at":
+                        datetime.now(
+                            timezone.utc
+                        )
                 }
             }
         )
@@ -872,7 +929,8 @@ def update_incident_status(
 
     return {
 
-        "message": "Incident status updated",
+        "message":
+            "Incident status updated",
 
         "status": status
     }
@@ -926,33 +984,39 @@ def get_map_incidents(
                 ""
             ),
 
-            "emergency_type": incident.get(
-                "emergency_type",
-                ""
-            ),
+            "emergency_type":
+                incident.get(
+                    "emergency_type",
+                    ""
+                ),
 
-            "priority": incident.get(
-                "priority",
-                "Medium"
-            ),
+            "priority":
+                incident.get(
+                    "priority",
+                    "Medium"
+                ),
 
-            "status": incident.get(
-                "status",
-                "Reported"
-            ),
+            "status":
+                incident.get(
+                    "status",
+                    "Reported"
+                ),
 
-            "latitude": incident.get(
-                "latitude"
-            ),
+            "latitude":
+                incident.get(
+                    "latitude"
+                ),
 
-            "longitude": incident.get(
-                "longitude"
-            ),
+            "longitude":
+                incident.get(
+                    "longitude"
+                ),
 
-            "is_sos": incident.get(
-                "is_sos",
-                False
-            )
+            "is_sos":
+                incident.get(
+                    "is_sos",
+                    False
+                )
         })
 
     return result
@@ -969,25 +1033,60 @@ def get_nearby_services(
 ):
 
     print(
-        f"Searching emergency services near: "
-        f"{lat}, {lng}"
+        f"Searching emergency services near "
+        f"latitude={lat}, longitude={lng}"
     )
 
-    # Search within 15 KM
+    # --------------------------------------------------------
+    # Validate GPS coordinates
+    # --------------------------------------------------------
+
+    if not (
+        -90 <= lat <= 90
+        and
+        -180 <= lng <= 180
+    ):
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid latitude or longitude."
+        )
+
+    # --------------------------------------------------------
+    # Search radius
+    # --------------------------------------------------------
+
+    radius = 15000
+
+    # --------------------------------------------------------
+    # OpenStreetMap / Overpass query
+    #
+    # Search for actual emergency services.
+    # --------------------------------------------------------
+
     overpass_query = f"""
-    [out:json][timeout:25];
+    [out:json][timeout:40];
 
     (
-      nwr["amenity"="hospital"](around:15000,{lat},{lng});
-      nwr["amenity"="police"](around:15000,{lat},{lng});
-      nwr["amenity"="fire_station"](around:15000,{lat},{lng});
-      nwr["amenity"="shelter"](around:15000,{lat},{lng});
+      nwr["amenity"="hospital"](around:{radius},{lat},{lng});
+      nwr["healthcare"="hospital"](around:{radius},{lat},{lng});
+      nwr["healthcare"="clinic"](around:{radius},{lat},{lng});
+
+      nwr["amenity"="police"](around:{radius},{lat},{lng});
+
+      nwr["amenity"="fire_station"](around:{radius},{lat},{lng});
+
+      nwr["amenity"="shelter"](around:{radius},{lat},{lng});
+      nwr["social_facility"="shelter"](around:{radius},{lat},{lng});
     );
 
     out center tags;
     """
 
+    # --------------------------------------------------------
     # Multiple Overpass servers
+    # --------------------------------------------------------
+
     servers = [
 
         "https://overpass.kumi.systems/api/interpreter",
@@ -996,6 +1095,10 @@ def get_nearby_services(
 
         "https://overpass.private.coffee/api/interpreter"
     ]
+
+    # --------------------------------------------------------
+    # Try each server
+    # --------------------------------------------------------
 
     for server in servers:
 
@@ -1013,11 +1116,11 @@ def get_nearby_services(
                     "data": overpass_query
                 },
 
-                timeout=30,
+                timeout=45,
 
                 headers={
                     "User-Agent":
-                    "EmergencyResponseApp/1.0"
+                        "EmergencyResponseApp/1.0"
                 }
             )
 
@@ -1026,7 +1129,7 @@ def get_nearby_services(
                 f"{response.status_code}"
             )
 
-            # Try next server if current one fails
+            # Try next server if request failed
             if response.status_code != 200:
 
                 print(
@@ -1050,6 +1153,10 @@ def get_nearby_services(
 
             places = []
 
+            # ------------------------------------------------
+            # Process OpenStreetMap elements
+            # ------------------------------------------------
+
             for element in elements:
 
                 tags = element.get(
@@ -1057,9 +1164,9 @@ def get_nearby_services(
                     {}
                 )
 
-                # --------------------------------
-                # NODE
-                # --------------------------------
+                # --------------------------------------------
+                # Get coordinates
+                # --------------------------------------------
 
                 if element.get("type") == "node":
 
@@ -1070,10 +1177,6 @@ def get_nearby_services(
                     element_lng = element.get(
                         "lon"
                     )
-
-                # --------------------------------
-                # WAY / RELATION
-                # --------------------------------
 
                 else:
 
@@ -1090,29 +1193,88 @@ def get_nearby_services(
                         "lon"
                     )
 
-                # Skip elements without coordinates
+                # Skip if coordinates are missing
                 if (
                     element_lat is None
                     or
                     element_lng is None
                 ):
+
                     continue
 
-                amenity = tags.get(
-                    "amenity",
-                    "other"
+                # --------------------------------------------
+                # Get actual OSM name
+                # --------------------------------------------
+
+                name = (
+                    tags.get("name")
+                    or
+                    tags.get("official_name")
+                    or
+                    tags.get("short_name")
                 )
 
-                name = tags.get(
-                    "name",
-                    "Unnamed Emergency Service"
-                )
+                # IMPORTANT:
+                # Do not display fake names.
+                # Skip unnamed places.
+                if not name:
+
+                    continue
+
+                # --------------------------------------------
+                # Determine service type
+                # --------------------------------------------
+
+                if (
+                    tags.get("amenity")
+                    == "hospital"
+                    or
+                    tags.get("healthcare")
+                    == "hospital"
+                    or
+                    tags.get("healthcare")
+                    == "clinic"
+                ):
+
+                    service_type = "hospital"
+
+                elif tags.get("amenity") == "police":
+
+                    service_type = "police"
+
+                elif tags.get("amenity") == "fire_station":
+
+                    service_type = "fire_station"
+
+                elif (
+                    tags.get("amenity")
+                    == "shelter"
+                    or
+                    tags.get("social_facility")
+                    == "shelter"
+                ):
+
+                    service_type = "shelter"
+
+                else:
+
+                    continue
+
+                # --------------------------------------------
+                # Phone number
+                # --------------------------------------------
 
                 phone = (
                     tags.get("phone")
                     or
                     tags.get("contact:phone")
+                    or
+                    tags.get("telephone")
                 )
+
+                # --------------------------------------------
+                # Calculate distance
+                # --------------------------------------------
 
                 distance = calculate_distance(
 
@@ -1120,38 +1282,71 @@ def get_nearby_services(
 
                     lng,
 
-                    element_lat,
+                    float(element_lat),
 
-                    element_lng
+                    float(element_lng)
                 )
 
                 places.append({
 
-                    "name": name,
+                    "name": str(name),
 
-                    "type": amenity,
+                    "type": service_type,
 
-                    "latitude": element_lat,
+                    "latitude":
+                        float(element_lat),
 
-                    "longitude": element_lng,
+                    "longitude":
+                        float(element_lng),
 
-                    "distance": round(
-                        distance,
-                        2
-                    ),
+                    "distance":
+                        round(
+                            distance,
+                            2
+                        ),
 
                     "phone": phone
                 })
 
-            # Sort nearest first
+            # ------------------------------------------------
+            # Remove duplicate places
+            # ------------------------------------------------
+
+            unique_places = {}
+
+            for place in places:
+
+                key = (
+                    place["name"].strip().lower(),
+                    round(place["latitude"], 5),
+                    round(place["longitude"], 5)
+                )
+
+                if key not in unique_places:
+
+                    unique_places[key] = place
+
+            places = list(
+                unique_places.values()
+            )
+
+            # ------------------------------------------------
+            # Sort by distance
+            # ------------------------------------------------
+
             places.sort(
                 key=lambda x: x["distance"]
             )
 
             print(
-                f"Found {len(places)} "
-                f"nearby emergency services"
+                f"Found "
+                f"{len(places)} named emergency "
+                f"services."
             )
+
+            # ------------------------------------------------
+            # Return real places only
+            # ------------------------------------------------
 
             return places[:50]
 
@@ -1173,6 +1368,15 @@ def get_nearby_services(
 
             continue
 
+        except ValueError as error:
+
+            print(
+                f"Invalid JSON from "
+                f"{server}: {error}"
+            )
+
+            continue
+
         except Exception as error:
 
             print(
@@ -1181,73 +1385,24 @@ def get_nearby_services(
             )
 
             continue
-            print("ALL OVERPASS SERVERS FAILED")
 
-    print("Using fallback emergency services...")
-
-    # ========================================================
-    # FALLBACK SERVICES
-    # ========================================================
-
-    fallback_services = [
-
-        {
-            "name": "Emergency Hospital",
-            "type": "hospital",
-            "latitude": lat + 0.008,
-            "longitude": lng + 0.006,
-            "phone": None
-        },
-
-        {
-            "name": "Nearby Police Station",
-            "type": "police",
-            "latitude": lat + 0.010,
-            "longitude": lng - 0.005,
-            "phone": None
-        },
-
-        {
-            "name": "Nearby Fire Station",
-            "type": "fire_station",
-            "latitude": lat - 0.009,
-            "longitude": lng + 0.007,
-            "phone": None
-        },
-
-        {
-            "name": "Emergency Shelter",
-            "type": "shelter",
-            "latitude": lat - 0.006,
-            "longitude": lng - 0.008,
-            "phone": None
-        }
-    ]
-
-    for service in fallback_services:
-
-        service["distance"] = round(
-            calculate_distance(
-                lat,
-                lng,
-                service["latitude"],
-                service["longitude"]
-            ),
-            2
-        )
-
-    fallback_services.sort(
-        key=lambda x: x["distance"]
-    )
+    # --------------------------------------------------------
+    # IMPORTANT:
+    # Do NOT return fake emergency locations.
+    # --------------------------------------------------------
 
     print(
-        f"Returning {len(fallback_services)} "
-        f"fallback emergency services"
+        "All Overpass servers failed."
     )
 
-    return fallback_services
-
-    
+    raise HTTPException(
+        status_code=503,
+        detail=(
+            "Nearby emergency services are "
+            "temporarily unavailable. "
+            "Please try again."
+        )
+    )
 
 
 # ============================================================
@@ -1286,7 +1441,8 @@ def startup_event():
         )
 
     print(
-        "API running on http://127.0.0.1:8000"
+        "API running on "
+        "http://127.0.0.1:8000"
     )
 
     print(

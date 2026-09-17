@@ -1089,13 +1089,12 @@ def get_nearby_services(
 
     servers = [
 
-        "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass-api.de/api/interpreter",
 
-        "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
 
-        "https://overpass.private.coffee/api/interpreter"
-    ]
-
+    "https://overpass.kumi.systems/api/interpreter"
+]
     # --------------------------------------------------------
     # Try each server
     # --------------------------------------------------------
@@ -1116,7 +1115,7 @@ def get_nearby_services(
                     "data": overpass_query
                 },
 
-                timeout=45,
+                timeout=15,
 
                 headers={
                     "User-Agent":

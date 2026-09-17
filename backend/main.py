@@ -1026,6 +1026,10 @@ def get_map_incidents(
 # NEARBY EMERGENCY SERVICES
 # ============================================================
 
+# ============================================================
+# NEARBY EMERGENCY SERVICES
+# ============================================================
+
 @app.get("/api/nearby")
 def get_nearby_services(
     lat: float,
@@ -1033,7 +1037,7 @@ def get_nearby_services(
 ):
 
     print(
-        f"Searching emergency services near "
+        f"Searching MongoDB emergency services near "
         f"latitude={lat}, longitude={lng}"
     )
 
@@ -1053,356 +1057,168 @@ def get_nearby_services(
         )
 
     # --------------------------------------------------------
-    # Search radius
+    # Check MongoDB
     # --------------------------------------------------------
 
-    radius = 15000
+    check_database()
 
     # --------------------------------------------------------
-    # OpenStreetMap / Overpass query
-    #
-    # Search for actual emergency services.
+    # Emergency services collection
     # --------------------------------------------------------
 
-    overpass_query = f"""
-    [out:json][timeout:40];
-
-    (
-      nwr["amenity"="hospital"](around:{radius},{lat},{lng});
-      nwr["healthcare"="hospital"](around:{radius},{lat},{lng});
-      nwr["healthcare"="clinic"](around:{radius},{lat},{lng});
-
-      nwr["amenity"="police"](around:{radius},{lat},{lng});
-
-      nwr["amenity"="fire_station"](around:{radius},{lat},{lng});
-
-      nwr["amenity"="shelter"](around:{radius},{lat},{lng});
-      nwr["social_facility"="shelter"](around:{radius},{lat},{lng});
-    );
-
-    out center tags;
-    """
+    services_collection = db["emergency_services"]
 
     # --------------------------------------------------------
-    # Multiple Overpass servers
+    # Get services from MongoDB
     # --------------------------------------------------------
 
-    servers = [
-
-    "https://overpass-api.de/api/interpreter",
-
-    "https://overpass.private.coffee/api/interpreter",
-
-    "https://overpass.kumi.systems/api/interpreter"
-]
-    # --------------------------------------------------------
-    # Try each server
-    # --------------------------------------------------------
-
-    for server in servers:
-
-        try:
-
-            print(
-                f"Trying Overpass server: {server}"
-            )
-
-            response = requests.post(
-
-                server,
-
-                data={
-                    "data": overpass_query
-                },
-
-                timeout=15,
-
-                headers={
-                    "User-Agent":
-                        "EmergencyResponseApp/1.0"
-                }
-            )
-
-            print(
-                f"Overpass status: "
-                f"{response.status_code}"
-            )
-
-            # Try next server if request failed
-            if response.status_code != 200:
-
-                print(
-                    "Overpass response:",
-                    response.text[:500]
-                )
-
-                continue
-
-            data = response.json()
-
-            elements = data.get(
-                "elements",
-                []
-            )
-
-            print(
-                f"Elements received: "
-                f"{len(elements)}"
-            )
-
-            places = []
-
-            # ------------------------------------------------
-            # Process OpenStreetMap elements
-            # ------------------------------------------------
-
-            for element in elements:
-
-                tags = element.get(
-                    "tags",
-                    {}
-                )
-
-                # --------------------------------------------
-                # Get coordinates
-                # --------------------------------------------
-
-                if element.get("type") == "node":
-
-                    element_lat = element.get(
-                        "lat"
-                    )
-
-                    element_lng = element.get(
-                        "lon"
-                    )
-
-                else:
-
-                    center = element.get(
-                        "center",
-                        {}
-                    )
-
-                    element_lat = center.get(
-                        "lat"
-                    )
-
-                    element_lng = center.get(
-                        "lon"
-                    )
-
-                # Skip if coordinates are missing
-                if (
-                    element_lat is None
-                    or
-                    element_lng is None
-                ):
-
-                    continue
-
-                # --------------------------------------------
-                # Get actual OSM name
-                # --------------------------------------------
-
-                name = (
-                    tags.get("name")
-                    or
-                    tags.get("official_name")
-                    or
-                    tags.get("short_name")
-                )
-
-                # IMPORTANT:
-                # Do not display fake names.
-                # Skip unnamed places.
-                if not name:
-
-                    continue
-
-                # --------------------------------------------
-                # Determine service type
-                # --------------------------------------------
-
-                if (
-                    tags.get("amenity")
-                    == "hospital"
-                    or
-                    tags.get("healthcare")
-                    == "hospital"
-                    or
-                    tags.get("healthcare")
-                    == "clinic"
-                ):
-
-                    service_type = "hospital"
-
-                elif tags.get("amenity") == "police":
-
-                    service_type = "police"
-
-                elif tags.get("amenity") == "fire_station":
-
-                    service_type = "fire_station"
-
-                elif (
-                    tags.get("amenity")
-                    == "shelter"
-                    or
-                    tags.get("social_facility")
-                    == "shelter"
-                ):
-
-                    service_type = "shelter"
-
-                else:
-
-                    continue
-
-                # --------------------------------------------
-                # Phone number
-                # --------------------------------------------
-
-                phone = (
-                    tags.get("phone")
-                    or
-                    tags.get("contact:phone")
-                    or
-                    tags.get("telephone")
-                )
-
-                # --------------------------------------------
-                # Calculate distance
-                # --------------------------------------------
-
-                distance = calculate_distance(
-
-                    lat,
-
-                    lng,
-
-                    float(element_lat),
-
-                    float(element_lng)
-                )
-
-                places.append({
-
-                    "name": str(name),
-
-                    "type": service_type,
-
-                    "latitude":
-                        float(element_lat),
-
-                    "longitude":
-                        float(element_lng),
-
-                    "distance":
-                        round(
-                            distance,
-                            2
-                        ),
-
-                    "phone": phone
-                })
-
-            # ------------------------------------------------
-            # Remove duplicate places
-            # ------------------------------------------------
-
-            unique_places = {}
-
-            for place in places:
-
-                key = (
-                    place["name"].strip().lower(),
-                    round(place["latitude"], 5),
-                    round(place["longitude"], 5)
-                )
-
-                if key not in unique_places:
-
-                    unique_places[key] = place
-
-            places = list(
-                unique_places.values()
-            )
-
-            # ------------------------------------------------
-            # Sort by distance
-            # ------------------------------------------------
-
-            places.sort(
-                key=lambda x: x["distance"]
-            )
-
-            print(
-                f"Found "
-                f"{len(places)} named emergency "
-                f"services."
-            )
-
-            # ------------------------------------------------
-            # Return real places only
-            # ------------------------------------------------
-
-            return places[:50]
-
-        except requests.exceptions.Timeout:
-
-            print(
-                f"Timeout from Overpass server: "
-                f"{server}"
-            )
-
-            continue
-
-        except requests.exceptions.RequestException as error:
-
-            print(
-                f"Request error from "
-                f"{server}: {error}"
-            )
-
-            continue
-
-        except ValueError as error:
-
-            print(
-                f"Invalid JSON from "
-                f"{server}: {error}"
-            )
-
-            continue
-
-        except Exception as error:
-
-            print(
-                f"Overpass error from "
-                f"{server}: {error}"
-            )
-
-            continue
-
-    # --------------------------------------------------------
-    # IMPORTANT:
-    # Do NOT return fake emergency locations.
-    # --------------------------------------------------------
-
-    print(
-        "All Overpass servers failed."
-    )
-
-    raise HTTPException(
-        status_code=503,
-        detail=(
-            "Nearby emergency services are "
-            "temporarily unavailable. "
-            "Please try again."
+    services = list(
+        services_collection.find(
+            {},
+            {
+                "_id": 0,
+                "name": 1,
+                "type": 1,
+                "latitude": 1,
+                "longitude": 1,
+                "phone": 1
+            }
         )
     )
 
+    print(
+        f"Total services stored in MongoDB: "
+        f"{len(services)}"
+    )
+
+    places = []
+
+    # --------------------------------------------------------
+    # Calculate distance from user's location
+    # --------------------------------------------------------
+
+    for service in services:
+
+        service_lat = service.get(
+            "latitude"
+        )
+
+        service_lng = service.get(
+            "longitude"
+        )
+
+        # Skip invalid locations
+        if (
+            service_lat is None
+            or
+            service_lng is None
+        ):
+
+            continue
+
+        distance = calculate_distance(
+
+            lat,
+
+            lng,
+
+            float(service_lat),
+
+            float(service_lng)
+        )
+
+        # ----------------------------------------------------
+        # Only show services within 15 km
+        # ----------------------------------------------------
+
+        if distance <= 15:
+
+            places.append({
+
+                "name": service.get(
+                    "name",
+                    "Unnamed Emergency Service"
+                ),
+
+                "type": service.get(
+                    "type",
+                    "other"
+                ),
+
+                "latitude":
+                    float(service_lat),
+
+                "longitude":
+                    float(service_lng),
+
+                "distance":
+                    round(
+                        distance,
+                        2
+                    ),
+
+                "phone":
+                    service.get(
+                        "phone"
+                    )
+            })
+
+    # --------------------------------------------------------
+    # Remove very close duplicate entries
+    # --------------------------------------------------------
+
+    unique_places = {}
+
+    for place in places:
+
+        key = (
+
+            place["name"]
+            .strip()
+            .lower(),
+
+            round(
+                place["latitude"],
+                4
+            ),
+
+            round(
+                place["longitude"],
+                4
+            )
+        )
+
+        if key not in unique_places:
+
+            unique_places[key] = place
+
+    places = list(
+        unique_places.values()
+    )
+
+    # --------------------------------------------------------
+    # Sort nearest first
+    # --------------------------------------------------------
+
+    places.sort(
+        key=lambda x: x["distance"]
+    )
+
+    print(
+        f"Found {len(places)} emergency "
+        f"services within 15 km."
+    )
+
+    # --------------------------------------------------------
+    # Return nearest 50 services
+    # --------------------------------------------------------
+
+    return places[:50]
+
+
+# ============================================================
+# STARTUP
+# ============================================================
 
 # ============================================================
 # STARTUP

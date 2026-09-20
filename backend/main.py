@@ -60,7 +60,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://emergency-response-platform-two.vercel.app",
+         "https://emergency-response-platform-lp9m188l1-sahala-s-portfolio.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -56,11 +56,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-         "https://emergency-response-platform-lp9m188l1-sahala-s-portfolio.vercel.app",
+        "https://emergency-response-platform-two.vercel.app",
+        "https://emergency-response-platform-cc1p212v3-sahala-s-portfolio.vercel.app",
+        "http://localhost:5173"
     ],
     allow_credentials=True,
     allow_methods=["*"],
